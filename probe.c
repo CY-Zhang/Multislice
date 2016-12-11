@@ -290,7 +290,7 @@ int main()
 		  chi0 = chi( aber, wavlen, kx, ky, dx, dy );
                    pixr[ix][iy]= (float) ( 0.5 * cos(chi0));
                    pixi[ix][iy]= (float) (-0.5 * sin(chi0));
-                   printf("smooth by 0.5 at ix=%d, iy=%d\n", ix, iy );
+                   printf("smooth by 0.5 at ix=%d, iy=%d\n", ix, iy );p
                 } else if ( k2 <= k2max ) {
 		  chi0 = chi( aber, wavlen, kx, ky, dx, dy );
                    pixr[ix][iy]= (float)  cos(chi0);

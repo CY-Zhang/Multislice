@@ -6,6 +6,7 @@ Updates in 11/3/16 version:
 -would ask user whether outer collection anlge is determined by aperture
 	- if yes, a cutoff would be applied at outer collection angle
 	- if no, the whole detecor would be used regardless of the outer collection angle entered by user
+-simulation code supports the use of a normalized detector sensitivity map with rotation option availiable
 
 
 
@@ -14,7 +15,7 @@ To install the package, type
 
 	make
 
-to compile everything with icc compiler
+to compile everything with icc compiler on Condor system
 
 	make atompot
 	make autoslice

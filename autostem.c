@@ -1569,7 +1569,7 @@ void STEMsignals( double x[], double y[], int npos,
                         probei[ip][ix][iy] = prr*tri[iyt] + pri*trr[iyt];
                     } /* end for(iy...) */
                 }  /* end for(ix...) */
-                fft2d( prober[ip], probei[ip], nxprobel, nyprobel, +1);
+                fft2d( prober[ip], probei[ip], nxprobel, nyprobel, +1); //+1 or -1 used to mark fft or ifft
            }
 
     
