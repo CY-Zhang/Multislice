@@ -637,13 +637,18 @@ int main()
                                 if( z2[i] < zslice ) na++; else break;
 
                             /* calculate transmission function, skip if layer empty */
-                            if( na > 0 ) {
+                            /*if( na > 0 ) {
                                 trlayer( &x2[istart], &y2[istart], &occ2[istart],
                                 &Znum2[istart],na, ax, by, v0, 
                                 transr, transi, nxl, nyl, &phirms, &nbeams, k2max );
 
                                 transmit( waver, wavei, transr, transi, nx, ny );
-                            }
+                            }*/
+                              trlayer( &x2[istart], &y2[istart], &occ2[istart],
+                                &Znum2[istart],na, ax, by, v0, 
+                                transr, transi, nxl, nyl, &phirms, &nbeams, k2max );
+
+                              transmit( waver, wavei, transr, transi, nx, ny );
 
                             /* remember: prop needed here to get anti-aliasing
                                                 right */
@@ -794,16 +799,20 @@ int main()
                         if( z[i] < zslice ) na++; else break;
 
                     /* calculate transmission function, skip if layer empty */
-                    if( na > 0 ) {
+                    /*if( na > 0 ) {
                         trlayer( &x[istart], &y[istart], &occ[istart],
                            &Znum[istart], na, ax, by, v0, transr, transi,
-                           nxl, nyl, &phirms, &nbeams, k2max );
+                           nxl, nyl, &phirms, &nbeams, k2max );*/
 
                         /*??? printf("average atompot comparison = %g\n", 
                                        phirms/(wavlen*mm0) ); */
 
-                        transmit( waver, wavei, transr, transi, nx, ny );
-                    }
+                    /*    transmit( waver, wavei, transr, transi, nx, ny );
+                    }*/
+                      trlayer( &x[istart], &y[istart], &occ[istart],
+                           &Znum[istart], na, ax, by, v0, transr, transi,
+                           nxl, nyl, &phirms, &nbeams, k2max );
+                      transmit( waver, wavei, transr, transi, nx, ny );
 
                     /*  bandwidth limit */
                     fft2d( waver, wavei, nxl, nyl, +1);
