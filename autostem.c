@@ -521,6 +521,7 @@ int main()
 
 /*Calculate mrad/px ratio based on the input inner and outer angle, sens = 0.5 used as 
     detector border threshold*/
+    /*2-17-17 new scheme to calculate mrad/px ratio based on input distance between detector inner edge to center*/
 
     for( idetect=0; idetect<ndetect; idetect++) 
     {
@@ -528,20 +529,17 @@ int main()
             " of collector :\n", idetect+1);
         scanf("%lg %lg",
             &almin[idetect], &almax[idetect] );
-        OutCut = askYN("Is the outer collection angle limited by aperture?");
-        if (OutCut != 1)
-        {
-          almax[idetect]==10000; /* if the outer collection angle is not determined by aperture, use a large enough outer angle */
-        }
+        printf("Distance from detector INNER EDGE to CENTER (px):\n");
+        scanf("%f", &ratio[idetect]);
+        printf("ratio[1]= %f, almin[1]=%f\n", ratio[idetect],almin[idetect] );
         printf("Name of file to save adapted sensitivity map for detector %d: \n",idetect+1);
         scanf("%s", probe_file[idetect+1]);
         probe_file[0] = "detector_rotated.tif";
-        px_in_1 = 0;
+/*        px_in_1 = 0;
         px_in_2 = 0;
         for (i = centery; i >0; i--)
         {
           temp_sens = sensmap[centerx][i];
-          /*printf("sensmap[%d][%d] = %f \n", centerx, i, temp_sens);*/
           if ((temp_sens>0.05) && (px_in_1 == 0))
           {
             px_in_1 = i;
@@ -557,12 +555,14 @@ int main()
           }
         }
         px_in_1f = (float)px_in_1;
-        px_in_2f = (float)px_in_2;
+        px_in_2f = (float)px_in_2;*/
         /* temp scheme for ratio, use only inner angle input to determine the mrad/px ratio */
-        ratio[idetect] = 2*almin[idetect]/(fabs(px_in_1f-(float)centery)+fabs(px_in_2f-(float)centery));
+/*        ratio[idetect] = 2*almin[idetect]/(fabs(px_in_1f-(float)centery)+fabs(px_in_2f-(float)centery));*/
+        ratio[idetect] = almin[idetect]/ratio[idetect];
         
+        printf("ratio[1]= %f, almin[1]=%f\n", ratio[idetect],almin[idetect] );
         printf("ratio of detector %d is %f mrad/px\n", idetect+1, ratio[idetect]);
-        printf("px_in_if = %f , px_in_2f = %f\n", px_in_1f, px_in_2f);
+/*        printf("px_in_if = %f , px_in_2f = %f\n", px_in_1f, px_in_2f);*/
     }  /* end for(idetect=.. */
 
     /*  calculate spatial frequencies for future use
@@ -1569,7 +1569,7 @@ void STEMsignals( double x[], double y[], int npos,
                         probei[ip][ix][iy] = prr*tri[iyt] + pri*trr[iyt];
                     } /* end for(iy...) */
                 }  /* end for(ix...) */
-                fft2d( prober[ip], probei[ip], nxprobel, nyprobel, +1); //+1 or -1 used to mark fft or ifft
+                fft2d( prober[ip], probei[ip], nxprobel, nyprobel, +1); /*+1 or -1 used to mark fft or ifft*/
            }
 
     
