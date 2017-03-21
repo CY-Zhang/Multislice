@@ -652,6 +652,7 @@ int main()
     memest += 2*nx*ny; /* transr, transi */
     memest += 4*natom; /* xa2, ya2, za2, occ2 */
     memest += 14*nxprobe; /* kxp, kyp, kxp2, kyp2, x2, y2, kx, ky, kx2, ky2, propxr, propxi, popyr, poropyi */
+    memest += 2*pacbed_nx*pacbed_ny*nThick*nxout*nyout; /* cbed_signals and cbed */
     memest *= (long)(1.9*sizeof(float));  /* 1.9 here is a fudge.  Something's wrong that I can't find. */
     printf("Estimated memory use is %g MB\n", (float)memest/(1024*1024));
     if(memest > MAXMEM) {
@@ -660,9 +661,11 @@ int main()
     }
 
 
-    /* calculate # of pixels in the pacbed wave functions */
+    /* calculate # of pixels in the pacbed wave functions, force the number to be even so that pacbed_midx/y would be integer*/
     pacbed_nx = 2*ceil(ax*pacbed_kmax);
+    if (pacbed_nx % 2 != 0) pacbed_nx++;
     pacbed_ny = 2*ceil(by*pacbed_kmax);
+    if (pacbed_ny % 2 != 0) pacbed_ny++;
     printf("PACBED pattern calculated over (%d, %d) pixels.\n", pacbed_nx, pacbed_ny);
 
     /* allocate pacbed arrays */
@@ -866,10 +869,10 @@ int main()
 		}
 
     /* accumulate cbed array for all wobblers while cbed_signals will be renewed */
-    for (ixp = 0; ixp < pacbed_nx; ixp++){
-      for (iyp = 0; iyp < pacbed_ny; iyp++){
-        for (i = 0; i < nThick*nxout*nyout; i++){
-          cbed[ixp][iyp][i] += cbed_signals[ixp][iyp][i]; 
+    for (i = 0; i < nThick*nxout*nyout; i++){
+      for (ixp = 0; ixp < pacbed_nx; ixp++){
+        for (iyp = 0; iyp < pacbed_ny; iyp++){
+          cbed[ixp][iyp][i] += cbed_signals[ixp][iyp][i]/(float)nwobble; 
         }
       }
     }
@@ -880,7 +883,7 @@ int main()
         } /* end for(iwobble... ) */
 
         /*  output data files  */
-        for( it=0; it<nThick; it++)
+        for( it=0; it<nThick; it++){
         for( i=0; i<ndetect; i++) {
             rmin[it][i] = rmax[it][i] = pixr[i+it*ndetect][0][0];
             for( ix=0; ix<nxout; ix++)
@@ -889,7 +892,11 @@ int main()
                 if( temp < rmin[it][i] )rmin[it][i] = (float) temp;
                 if( temp > rmax[it][i] )rmax[it][i] = (float) temp;
             }
+          }
         }
+
+        param[1] = 1;
+        param[3] = 0;
 
   /* output pacbed data, one 2d image for each layer */
 	for(it=0; it<nThick; it++) {
@@ -898,6 +905,7 @@ int main()
 	      pacbed_out[ix][iy] = pacbed[ix][iy][it];
 	    }
 	  }
+
 	  invert2D(pacbed_out, pacbed_nx, pacbed_ny);
 	  sprintf(fileout, "%spacbed_%d.gfx", fileoutpre, it);
 	  fp = fopen(fileout, "w");
@@ -913,13 +921,21 @@ int main()
         for(ix=0; ix<pacbed_nx; ix++){
           for(iy=0; iy<pacbed_ny; iy++){
             pacbed_out[ix][iy] = cbed[ix][iy][i*nyout*nThick+j*nThick+it];
-            invert2D(pacbed_out, pacbed_nx, pacbed_ny);
-            sprintf(fileout, "%s_cbed-%d-%d-%d.gfx", fileoutpre, i,j,it);
-            fp = fopen(fileout, "w");
-            WriteDMFixedFormat(fp, pacbed_out, pacbed_nx, pacbed_ny);
-            fclose(fp);
-          }
         }
+      }
+
+/*      need to activate fft shift in STEMsignals to save gfx file */
+/*      invert2D(pacbed_out, pacbed_nx, pacbed_ny);
+      sprintf(fileout, "%scbed-%d-%d-%d.gfx", fileoutpre, i,j,it);
+      fp = fopen(fileout, "w");
+      WriteDMFixedFormat(fp, pacbed_out, pacbed_nx, pacbed_ny);
+      fclose(fp);*/
+
+      sprintf( fileout, "%scbed-%d-%d-%d.tif", fileoutpre, i, j, it );
+      if( tcreateFloatPixFile( fileout, pacbed_out,
+        (long)pacbed_nx, (long)pacbed_ny, 1, param ) != 1 ) {
+        printf("Cannot write cbed file %s.\n", fileout );
+      }
       }
     }
   }
@@ -1111,7 +1127,7 @@ void STEMsignals( double x[], double y[], int npos,
 {
     int ix, iy, ixt, iyt, idetect, *ixoff, *iyoff, ixmid, iymid;
     int istart, na, ip, i, it;
-    int pacbed_nxmin, pacbed_nymin, pacbed_ix, pacbed_iy;
+    int pacbed_nxmin, pacbed_nymin, pacbed_ix, pacbed_iy, pacbedmidx, pacbedmidy, cbed_ix, cbed_iy;
 
     long nxprobel, nyprobel, nxl, nyl;
 
@@ -1159,6 +1175,8 @@ void STEMsignals( double x[], double y[], int npos,
 
     pacbed_nxmin = (nxprobe - pacbed_nx);
     pacbed_nymin = (nyprobe - pacbed_ny);
+    pacbedmidx = ceil(pacbed_nx/2);
+    pacbedmidy = ceil(pacbed_ny/2);
 
     /*  calculate all of the probe wave functions at once
         to reuse the transmission functions which take a long
@@ -1287,6 +1305,9 @@ void STEMsignals( double x[], double y[], int npos,
               thermal displacements so special case it
        */
        
+       /*printf("nxprobe = %d\n nyprobe = %d\n pacbed_nx = %d\n pacbed_ny = %d\n pacbedmidx = %d\n pacbedmidy = %d\n", nxprobe,nyprobe,pacbed_nx,pacbed_ny,pacbedmidx,pacbedmidy);*/
+       /*printf("ky[170] = %f\n ky[171] = %f\n ky[341] = %f\n ky[342] = %f\n pacbed_kmax = %f\n", ky[170], ky[171], ky[341], ky[342], pacbed_kmax);*/
+       /*if(abs(kx[195]) < pacbed_kmax) printf("kx[195] = %f\n ky[195] = %f\n kx[317] = %f\n ky[317] = %f\n pacbed_kmax = %f\n", fabs(kx[195]), fabs(ky[195]), fabs(kx[317]), fabs(ky[317]), pacbed_kmax);*/
        /*  look at all values because they may not be in order */
        for( it = 0; it<nThick; it++ ) {
         if( fabs(ThickSave[it]-zslice)<fabs(0.5*deltaz)) {
@@ -1304,25 +1325,36 @@ void STEMsignals( double x[], double y[], int npos,
 		              prr = prober[ip][ix][iy];
 		              pri = probei[ip][ix][iy];
 		              delta = prr*prr + pri*pri;
+                  
 			
-                /* FFT shift back */
-		              if(abs(kx[ix]) < pacbed_kmax) {
-		                if(abs(ky[iy]) < pacbed_kmax) {
-		                  if(ix <= ixmid) {
+                /* New scheme to cut wavefunction into pacbed/cbed, cbed format for tif and pacbed for gfx.
+                   Paul's previous method to cut wavefunction has some error and it's fixed here. 
+                   cz 3-21-17*/
+                  pacbed_ix = 9999;
+                  pacbed_iy = 9999;
+		                  if(ix < pacbedmidx) {
                         pacbed_ix = ix;
-		                  } else {
+                        cbed_ix = pacbed_ix + pacbedmidx;
+		                  } 
+                      if (ix >= nxprobe - pacbedmidx){
                         pacbed_ix = ix - pacbed_nxmin;
+                        cbed_ix = pacbed_ix - pacbedmidx;
 		                  }
-		                  if(iy <= iymid) {
+		                  if(iy < pacbedmidy) {
 			                   pacbed_iy = iy;
-		                  } else {
+                         cbed_iy = pacbed_iy + pacbedmidy;
+		                  } 
+                      if (iy >= nyprobe - pacbedmidy){
 			                   pacbed_iy = iy - pacbed_nymin;
+                         cbed_iy = pacbed_iy - pacbedmidy;
 		                  }
-		                /*printf("(ix, iy) = (%d, %d).  (pacbed_ix, pacbed_iy) = (%d, %d)\n", ix, iy, pacbed_ix, pacbed_iy);*/
+                  if (pacbed_ix!=9999 && pacbed_iy!=9999){
+		                  /*printf("(ix, iy) = (%d, %d).  (pacbed_ix, pacbed_iy) = (%d, %d).  (cbed_ix, cbed_iy) = (%d,  %d)\n", ix, iy, pacbed_ix, pacbed_iy, cbed_ix, cbed_iy);*/
 		                  pacbed_signals[pacbed_ix][pacbed_iy][it] = delta; 
-                      cbed_signals[pacbed_ix][pacbed_iy][cbedx*npos*nThick+ip*nThick+it] = delta;
-		                }
-		              }
+                      cbed_signals[cbed_ix][cbed_iy][cbedx*npos*nThick+ip*nThick+it] = delta;
+                  }
+
+
 		              sum[ip] += delta;  
 		              k2 = kxp2[ix] + kyp2[iy];
 		              for( idetect=0; idetect<ndetect; idetect++) {
@@ -1331,7 +1363,6 @@ void STEMsignals( double x[], double y[], int npos,
 		              }
 		            } /* end for(iy..) */
 	            } /* end for(ix. .) */
-                  /* CBED array collected in pacbed_signals, save as gfx file */
             }  /* end for( ip.. */
    
 	     }  /* end if( ((it...*/

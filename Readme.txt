@@ -1,5 +1,10 @@
 Multislice package updated 11/3/16, cz
 
+Updates in 3/17/17 version:
+- new function 'autocbed' to simulate bunch of cbed pattern added
+- one cbed would be simulated for each probe position and thickness (total nxout*nyout*nThick)
+- PACBED pattern and STEM image would be simulated too
+
 Updates in 11/3/16 version:
 -minor bug fixed for using three or more collection angle ranges
 -use inner collection anlge to determine the mrad/px ratio on detector sensitivity map
@@ -13,7 +18,7 @@ Updates in 11/3/16 version:
 
 To install the package, type 
 
-	make
+	make all
 
 to compile everything with icc compiler on Condor system
 
@@ -30,6 +35,7 @@ to compile everything with icc compiler on Condor system
 	make ktiff2dm
 	make autowave
 	make autopacbed
+	make autocbed
 
 to compile part of the package, type
 
