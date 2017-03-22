@@ -661,11 +661,9 @@ int main()
     }
 
 
-    /* calculate # of pixels in the pacbed wave functions, force the number to be even so that pacbed_midx/y would be integer*/
-    pacbed_nx = 2*ceil(ax*pacbed_kmax);
-    if (pacbed_nx % 2 != 0) pacbed_nx++;
-    pacbed_ny = 2*ceil(by*pacbed_kmax);
-    if (pacbed_ny % 2 != 0) pacbed_ny++;
+    /* calculate # of pixels in the pacbed wave functions, force the number to be odd*/
+    pacbed_nx = 2*floor(ax*pacbed_kmax)+1;
+    pacbed_ny = 2*floor(by*pacbed_kmax)+1;
     printf("PACBED pattern calculated over (%d, %d) pixels.\n", pacbed_nx, pacbed_ny);
 
     /* allocate pacbed arrays */
@@ -1175,8 +1173,8 @@ void STEMsignals( double x[], double y[], int npos,
 
     pacbed_nxmin = (nxprobe - pacbed_nx);
     pacbed_nymin = (nyprobe - pacbed_ny);
-    pacbedmidx = ceil(pacbed_nx/2);
-    pacbedmidy = ceil(pacbed_ny/2);
+    pacbedmidx = (pacbed_nx-1)/2;
+    pacbedmidy = (pacbed_ny-1)/2;
 
     /*  calculate all of the probe wave functions at once
         to reuse the transmission functions which take a long
@@ -1305,7 +1303,7 @@ void STEMsignals( double x[], double y[], int npos,
               thermal displacements so special case it
        */
        
-       /*printf("nxprobe = %d\n nyprobe = %d\n pacbed_nx = %d\n pacbed_ny = %d\n pacbedmidx = %d\n pacbedmidy = %d\n", nxprobe,nyprobe,pacbed_nx,pacbed_ny,pacbedmidx,pacbedmidy);*/
+       /*printf("nxprobe = %d\n nyprobe = %d\n pacbed_nx = %d\n pacbed_ny = %d\n pacbedmidx = %d\n pacbedmidy = %d\n pacbed_nxmin = %d\n pacbed_nymin = %d\n", nxprobe,nyprobe,pacbed_nx,pacbed_ny,pacbedmidx,pacbedmidy,pacbed_nxmin,pacbed_nymin);*/
        /*printf("ky[170] = %f\n ky[171] = %f\n ky[341] = %f\n ky[342] = %f\n pacbed_kmax = %f\n", ky[170], ky[171], ky[341], ky[342], pacbed_kmax);*/
        /*if(abs(kx[195]) < pacbed_kmax) printf("kx[195] = %f\n ky[195] = %f\n kx[317] = %f\n ky[317] = %f\n pacbed_kmax = %f\n", fabs(kx[195]), fabs(ky[195]), fabs(kx[317]), fabs(ky[317]), pacbed_kmax);*/
        /*  look at all values because they may not be in order */
@@ -1330,29 +1328,29 @@ void STEMsignals( double x[], double y[], int npos,
                 /* New scheme to cut wavefunction into pacbed/cbed, cbed format for tif and pacbed for gfx.
                    Paul's previous method to cut wavefunction has some error and it's fixed here. 
                    cz 3-21-17*/
-                  pacbed_ix = 9999;
-                  pacbed_iy = 9999;
-		                  if(ix < pacbedmidx) {
+                  /*pacbed_ix = 9999;
+                  pacbed_iy = 9999;*/
+                  if (fabs(kx[ix]) < pacbed_kmax){
+                    if (fabs(ky[iy]) < pacbed_kmax){
+		                  if(ix <= ixmid) {
                         pacbed_ix = ix;
                         cbed_ix = pacbed_ix + pacbedmidx;
-		                  } 
-                      if (ix >= nxprobe - pacbedmidx){
+		                  } else {
                         pacbed_ix = ix - pacbed_nxmin;
-                        cbed_ix = pacbed_ix - pacbedmidx;
+                        cbed_ix = pacbed_ix - pacbedmidx - 1;
 		                  }
-		                  if(iy < pacbedmidy) {
+		                  if(iy <= iymid) {
 			                   pacbed_iy = iy;
                          cbed_iy = pacbed_iy + pacbedmidy;
-		                  } 
-                      if (iy >= nyprobe - pacbedmidy){
+		                  } else {
 			                   pacbed_iy = iy - pacbed_nymin;
-                         cbed_iy = pacbed_iy - pacbedmidy;
+                         cbed_iy = pacbed_iy - pacbedmidy - 1;
 		                  }
-                  if (pacbed_ix!=9999 && pacbed_iy!=9999){
 		                  /*printf("(ix, iy) = (%d, %d).  (pacbed_ix, pacbed_iy) = (%d, %d).  (cbed_ix, cbed_iy) = (%d,  %d)\n", ix, iy, pacbed_ix, pacbed_iy, cbed_ix, cbed_iy);*/
 		                  pacbed_signals[pacbed_ix][pacbed_iy][it] = delta; 
                       cbed_signals[cbed_ix][cbed_iy][cbedx*npos*nThick+ip*nThick+it] = delta;
                   }
+                }
 
 
 		              sum[ip] += delta;  
