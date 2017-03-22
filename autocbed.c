@@ -760,11 +760,11 @@ int main()
        pixr = (float***) malloc3D( ndetect*nThick, nxout, nyout,
            sizeof(float), "pixr"  );
        for( i=0; i<(nThick*ndetect); i++) {
-	 for( ix=0; ix<nxout; ix++) {
+	       for( ix=0; ix<nxout; ix++) {
            for( iy=0; iy<nyout; iy++) {
-	     pixr[i][ix][iy] = 0.0F;
-	   }
-	 }
+	           pixr[i][ix][iy] = 0.0F;
+	         }
+	       }
        }
 
        for( i=0; i<nThick; i++) {
@@ -884,11 +884,12 @@ int main()
         for( it=0; it<nThick; it++){
         for( i=0; i<ndetect; i++) {
             rmin[it][i] = rmax[it][i] = pixr[i+it*ndetect][0][0];
-            for( ix=0; ix<nxout; ix++)
-            for( iy=0; iy<nyout; iy++) {
+            for( ix=0; ix<nxout; ix++){
+              for( iy=0; iy<nyout; iy++) {
                 temp = pixr[i+it*ndetect][ix][iy];
                 if( temp < rmin[it][i] )rmin[it][i] = (float) temp;
                 if( temp > rmax[it][i] )rmax[it][i] = (float) temp;
+              }
             }
           }
         }
@@ -897,8 +898,8 @@ int main()
         param[3] = 0;
 
   /* output pacbed data, one 2d image for each layer */
-	for(it=0; it<nThick; it++) {
-	  for(ix=0; ix<pacbed_nx; ix++) {
+	for(it=0; it<nThick; it++){
+	  for(ix=0; ix<pacbed_nx; ix++){
 	    for(iy=0; iy<pacbed_ny; iy++) {
 	      pacbed_out[ix][iy] = pacbed[ix][iy][it];
 	    }
@@ -1194,12 +1195,12 @@ void STEMsignals( double x[], double y[], int npos,
 	      printf( "Chromatic defocus = %g Angstrom. \n", aber[0][0]);
 
         sum0 = 0.0;
-        for( ix=0; ix<nxprobe; ix++)
-        for( iy=0; iy<nyprobe; iy++) {
+        for( ix=0; ix<nxprobe; ix++) {
+          for( iy=0; iy<nyprobe; iy++) {
             k2 = kxp2[ix] + kyp2[iy];
-           if( (k2 >= k2maxa) && (k2 <= k2maxb) ) {
-	      /*chi = aphase(aber, wavlen, kxp[ix], kyp[iy], x[ip], y[ip]);*/
-	      chi = aphase(aber, wavlen, kxp[ix], kyp[iy], xoff, yoff);
+            if( (k2 >= k2maxa) && (k2 <= k2maxb) ) {
+	       /*chi = aphase(aber, wavlen, kxp[ix], kyp[iy], x[ip], y[ip]);*/
+	         chi = aphase(aber, wavlen, kxp[ix], kyp[iy], xoff, yoff);
                 prober[ip][ix][iy] = tr = (float) cos( chi );
                 probei[ip][ix][iy] = ti = (float) sin( chi );
                 sum0 += (double) (tr*tr + ti*ti);
@@ -1207,13 +1208,15 @@ void STEMsignals( double x[], double y[], int npos,
                  prober[ip][ix][iy] = 0.0F;
                  probei[ip][ix][iy] = 0.0F;
             }
+          }
         }
 
         scale = (float) ( 1.0/sqrt(sum0) );
-        for( ix=0; ix<nxprobe; ix++)
-        for( iy=0; iy<nyprobe; iy++) {
+        for( ix=0; ix<nxprobe; ix++) {
+          for( iy=0; iy<nyprobe; iy++) {
             prober[ip][ix][iy] *= scale;
             probei[ip][ix][iy] *= scale;
+          }
         }
 
     }  /* end for( ip...) */
@@ -1306,6 +1309,7 @@ void STEMsignals( double x[], double y[], int npos,
        /*printf("nxprobe = %d\n nyprobe = %d\n pacbed_nx = %d\n pacbed_ny = %d\n pacbedmidx = %d\n pacbedmidy = %d\n pacbed_nxmin = %d\n pacbed_nymin = %d\n", nxprobe,nyprobe,pacbed_nx,pacbed_ny,pacbedmidx,pacbedmidy,pacbed_nxmin,pacbed_nymin);*/
        /*printf("ky[170] = %f\n ky[171] = %f\n ky[341] = %f\n ky[342] = %f\n pacbed_kmax = %f\n", ky[170], ky[171], ky[341], ky[342], pacbed_kmax);*/
        /*if(abs(kx[195]) < pacbed_kmax) printf("kx[195] = %f\n ky[195] = %f\n kx[317] = %f\n ky[317] = %f\n pacbed_kmax = %f\n", fabs(kx[195]), fabs(ky[195]), fabs(kx[317]), fabs(ky[317]), pacbed_kmax);*/
+
        /*  look at all values because they may not be in order */
        for( it = 0; it<nThick; it++ ) {
         if( fabs(ThickSave[it]-zslice)<fabs(0.5*deltaz)) {
@@ -1328,8 +1332,7 @@ void STEMsignals( double x[], double y[], int npos,
                 /* New scheme to cut wavefunction into pacbed/cbed, cbed format for tif and pacbed for gfx.
                    Paul's previous method to cut wavefunction has some error and it's fixed here. 
                    cz 3-21-17*/
-                  /*pacbed_ix = 9999;
-                  pacbed_iy = 9999;*/
+
                   if (fabs(kx[ix]) < pacbed_kmax){
                     if (fabs(ky[iy]) < pacbed_kmax){
 		                  if(ix <= ixmid) {
@@ -1363,18 +1366,19 @@ void STEMsignals( double x[], double y[], int npos,
 	            } /* end for(ix. .) */
             }  /* end for( ip.. */
    
-	     }  /* end if( ((it...*/
+	     }  /* end if(fabs(...*/
+      }  /* end for (it...) */
 
-       nslice++;
-       zslice += deltaz;
-       istart += na;
+    nslice++;
+    zslice += deltaz;
+    istart += na;
+    printf("zslice = %f\n",zslice );
 
-    }  /* end while( istart...) */
-
+    
+  } /* end while(zslice...) */
     free( ixoff );
     free( iyoff );
     return;
-  } /* end while(zslice...) */
 }/* end STEMsignals() */
 
 

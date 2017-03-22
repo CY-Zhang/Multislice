@@ -40,6 +40,7 @@ all:
 	make ktiff2dm
 	make autowave
 	make autopacbed
+	make autocbed
 #
 #  entry point to remove compiled files
 #
@@ -103,6 +104,9 @@ autowave: autowave.c ${MYLIBS}
 
 autopacbed: autopacbed.c ${MYLIBS}
 	${CC} -o autopacbed autopacbed.c ${LIBS}
+
+autocbed: autocbed.c ${MYLIBS}
+	${CC} -o autocbed autocbed.c ${LIBS}
 #
 # define subroutine library
 #
