@@ -665,6 +665,7 @@ int main()
     pacbed_nx = 2*floor(ax*pacbed_kmax)+1;
     pacbed_ny = 2*floor(by*pacbed_kmax)+1;
     printf("PACBED pattern calculated over (%d, %d) pixels.\n", pacbed_nx, pacbed_ny);
+    printf("Maximum k recorded in CBED/PACBED pattern is %f Angstrom ^ -1\n", pacbed_kmax);
 
     /* allocate pacbed arrays */
     pacbed_signals = (float***) malloc3D(pacbed_nx, pacbed_ny, nThick, sizeof(float), "pacbed_signals");
@@ -1314,7 +1315,7 @@ void STEMsignals( double x[], double y[], int npos,
        for( it = 0; it<nThick; it++ ) {
         if( fabs(ThickSave[it]-zslice)<fabs(0.5*deltaz)) {
             
-            printf( "save ADF signal and CBED pattern, thickness level %d\n", it);  /* diagnostic */
+            /*printf( "save ADF signal and CBED pattern, thickness level %d\n", it);*/  /* diagnostic */
     
             for( ip=0; ip<npos; ip++) {
 	             /*  zero sum count */
@@ -1372,7 +1373,7 @@ void STEMsignals( double x[], double y[], int npos,
     nslice++;
     zslice += deltaz;
     istart += na;
-    printf("zslice = %f\n",zslice );
+    /*printf("zslice = %f\n",zslice );*/
 
     
   } /* end while(zslice...) */
