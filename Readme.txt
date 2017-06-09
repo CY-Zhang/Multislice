@@ -1,5 +1,8 @@
 Multislice package updated 11/3/16, cz
 
+Updates in 06/09/17 version:
+- Major bug fixed in Autocbed which moves the CBED assignment loop outside wobbler loop, CBED pattern should converge with number of phonons now
+
 Updates in 3/17/17 version:
 - new function 'autocbed' to simulate bunch of cbed pattern added
 - one cbed would be simulated for each probe position and thickness (total nxout*nyout*nThick)

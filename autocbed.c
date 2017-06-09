@@ -9,6 +9,7 @@ modified 02-03-10 to use CEOS probe aberrations up to A5.  pmv
 03-18-10 added Monte Carlo integration of dE / Cc
 
 09-11-11 revised to only save pacbed wave functions out to 5 times the convergence angle
+06-09-17 moved cbed sum procedure to the outside of wobbler loop which would then average over multiple configurations, cz
 
 ------------------------------------------------------------------------
 Copyright 1998,2008 Earl J. Kirkland
@@ -856,30 +857,22 @@ int main()
                         printf("Warning integrated intensity too large, = "
                         "%g at x,y= %g, %g\n", sums[iy], x[iy], y[iy] );
                 }
-            
-		/* accumulate pacbed patterns in from each line from pacbed_signals
-		   to pacbed */
-		for(it=0; it<nThick; it++) {
-		  for(ixp=0; ixp<pacbed_nx; ixp++) {
-		    for(iyp=0; iyp<pacbed_ny; iyp++) {
-		      pacbed[ixp][iyp][it] += pacbed_signals[ixp][iyp][it]/((float)(nxout*nyout*nwobble)); /* why normalize with nxout*nyout? */
-		    }
-		  }
-		}
-
-    /* accumulate cbed array for all wobblers while cbed_signals will be renewed */
-    for (i = 0; i < nThick*nxout*nyout; i++){
-      for (ixp = 0; ixp < pacbed_nx; ixp++){
-        for (iyp = 0; iyp < pacbed_ny; iyp++){
-          cbed[ixp][iyp][i] += cbed_signals[ixp][iyp][i]/(float)nwobble; 
-        }
-      }
-    }
-
-
             } /* end for(ix...) */
     
         } /* end for(iwobble... ) */
+
+          for (it = 0; it < nThick; it++){
+            for (ix = 0; ix < nxout; ix++){
+              for (iy = 0; iy < nyout; iy++){
+                for (ixp = 0; ixp < pacbed_nx; ixp++){
+                  for (iyp = 0; iyp < pacbed_ny; iyp++){
+                    cbed[ixp][iyp][ix*nyout*nThick+iy*nThick+it] += cbed_signals[ixp][iyp][ix*nyout*nThick+iy*nThick+it]/(float)nwobble; 
+                    pacbed[ixp][iyp][it] += cbed_signals[ixp][iyp][ix*nyout*nThick+iy*nThick+it]/((float)(nxout*nyout*nwobble)); 
+                  }
+                }
+              }
+            }
+          }
 
         /*  output data files  */
         for( it=0; it<nThick; it++){
@@ -905,6 +898,11 @@ int main()
 	      pacbed_out[ix][iy] = pacbed[ix][iy][it];
 	    }
 	  }
+    printf( fileout, "%spacbed-%d.tif", fileoutpre, it );
+    if( tcreateFloatPixFile( fileout, pacbed_out,
+      (long)pacbed_nx, (long)pacbed_ny, 1, param ) != 1 ) {
+      printf("Cannot write cbed file %s.\n", fileout );
+    }
 
 	  invert2D(pacbed_out, pacbed_nx, pacbed_ny);
 	  sprintf(fileout, "%spacbed_%d.gfx", fileoutpre, it);

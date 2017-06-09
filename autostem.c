@@ -519,8 +519,8 @@ int main()
     probe_file = (char**) malloc2D(ndetect+1, NCMAX, sizeof( char ),"probe_file" );
     ratio = (float*) malloc1D( ndetect,sizeof(float), "ratio");
 
-/*Calculate mrad/px ratio based on the input inner and outer angle, sens = 0.5 used as 
-    detector border threshold*/
+    /*Calculate mrad/px ratio based on the input inner and outer angle, sens = 0.5 used as 
+      detector border threshold*/
     /*2-17-17 new scheme to calculate mrad/px ratio based on input distance between detector inner edge to center*/
 
     for( idetect=0; idetect<ndetect; idetect++) 
