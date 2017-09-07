@@ -133,6 +133,7 @@ double walltimer;
 #define RMAX    5.0
 
 #define MAXMEM  1932735283 /* Maximum memory allocatable before giving an error, in bytes.  Currently 1.8 GB */
+#define MAXMEM  16000000000 /*Maximum memory updated for CBED simulation 9/7/17 cz*/
 
 /* global specimen and probe parameters to share */
 
@@ -653,7 +654,7 @@ int main()
     memest += 2*nx*ny; /* transr, transi */
     memest += 4*natom; /* xa2, ya2, za2, occ2 */
     memest += 14*nxprobe; /* kxp, kyp, kxp2, kyp2, x2, y2, kx, ky, kx2, ky2, propxr, propxi, popyr, poropyi */
-    memest += 2*pacbed_nx*pacbed_ny*nThick*nxout*nyout; /* cbed_signals and cbed */
+    memest += 2*pacbed_nx*pacbed_ny*nThick*nxout*nyout; /* cbed_signals and cbed, may not take so much memory */
     memest *= (long)(1.9*sizeof(float));  /* 1.9 here is a fudge.  Something's wrong that I can't find. */
     printf("Estimated memory use is %g MB\n", (float)memest/(1024*1024));
     if(memest > MAXMEM) {
