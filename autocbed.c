@@ -858,22 +858,23 @@ int main()
                         printf("Warning integrated intensity too large, = "
                         "%g at x,y= %g, %g\n", sums[iy], x[iy], y[iy] );
                 }
-            } /* end for(ix...) */
-    
-        } /* end for(iwobble... ) */
+            } /* end for(ix...) */  
 
-          for (it = 0; it < nThick; it++){
-            for (ix = 0; ix < nxout; ix++){
-              for (iy = 0; iy < nyout; iy++){
-                for (ixp = 0; ixp < pacbed_nx; ixp++){
-                  for (iyp = 0; iyp < pacbed_ny; iyp++){
-                    cbed[ixp][iyp][ix*nyout*nThick+iy*nThick+it] += cbed_signals[ixp][iyp][ix*nyout*nThick+iy*nThick+it]/(float)nwobble; 
-                    pacbed[ixp][iyp][it] += cbed_signals[ixp][iyp][ix*nyout*nThick+iy*nThick+it]/((float)(nxout*nyout*nwobble)); 
+                /* update cbed with cbed_signal from single phonon configuration */
+            for (it = 0; it < nThick; it++){
+              for (ix = 0; ix < nxout; ix++){
+                for (iy = 0; iy < nyout; iy++){
+                  for (ixp = 0; ixp < pacbed_nx; ixp++){
+                    for (iyp = 0; iyp < pacbed_ny; iyp++){
+                      cbed[ixp][iyp][ix*nyout*nThick+iy*nThick+it] += cbed_signals[ixp][iyp][ix*nyout*nThick+iy*nThick+it]/(float)nwobble; 
+                      pacbed[ixp][iyp][it] += cbed_signals[ixp][iyp][ix*nyout*nThick+iy*nThick+it]/((float)(nxout*nyout*nwobble)); 
+                    }
                   }
                 }
               }
-            }
-          }
+            } 
+        } /* end for(iwobble... ) */
+
 
         /*  output data files  */
         for( it=0; it<nThick; it++){
