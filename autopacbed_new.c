@@ -1150,7 +1150,8 @@ void STEMsignals( double x[], double y[], int npos,
         scale = (float) ( 1.0/sqrt(sum0) );
         for( ix=0; ix<nxprobe; ix++)
           for( iy=0; iy<nyprobe; iy++) {
-            scale_inco = 0.992 + 0.093 * exp(-((kxp[ix]*wavlen*1000-1.16)*(kxp[ix]*wavlen*1000-1.16)/2/9.43/9.43 + (kyp[iy]*wavlen*1000-1.45)*(kyp[iy]*wavlen*1000-1.45)/2/9.86/9.86));
+            /* Use newly calibrated 25.6mrad convergence angle, exp px size = 0.151mrad */
+            scale_inco = 0.992 + 0.093 * exp(-((kxp[ix]*wavlen*1000-1.00)*(kxp[ix]*wavlen*1000-1.00)/2/9.82/9.82 + (kyp[iy]*wavlen*1000+2.09)*(kyp[iy]*wavlen*1000+2.09)/2/10.27/10.27));
             if(( ix < 5 ) && ( iy < 5 )){
               printf("kx: %g ky: %g scal: %g   ",kxp[ix],kyp[iy],scale_inco);
             }
