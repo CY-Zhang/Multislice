@@ -1131,6 +1131,8 @@ void STEMsignals( double x[], double y[], int npos,
 	aber[0][0] = Df0 + cDf_sigma*rangauss(&iseed);  /* pmv chromatic aberration defocus */
 	printf( "Chromatic defocus = %g Angstrom. \n", aber[0][0]);
 
+/* Initialize beam with aberrations */
+
         sum0 = 0.0;
         for( ix=0; ix<nxprobe; ix++)
           for( iy=0; iy<nyprobe; iy++) {
@@ -1140,33 +1142,56 @@ void STEMsignals( double x[], double y[], int npos,
 	           chi = aphase(aber, wavlen, kxp[ix], kyp[iy], xoff, yoff);
                 prober[ip][ix][iy] = tr = (float) cos( chi );
                 probei[ip][ix][iy] = ti = (float) sin( chi );
-                sum0 += (double) (tr*tr + ti*ti);
             } else {
                  prober[ip][ix][iy] = 0.0F;
                  probei[ip][ix][iy] = 0.0F;
             }
           }
 
+/* Correct for probe non-uniformity using a Gaussian function, only calculate withi kmax, then calculate sum0 for normalization */
+
         scale = (float) ( 1.0/sqrt(sum0) );
         for( ix=0; ix<nxprobe; ix++)
           for( iy=0; iy<nyprobe; iy++) {
-            /* Use newly calibrated 25.6mrad convergence angle, exp px size = 0.151mrad */
-            scale_inco = 0.992 + 0.093 * exp(-((kxp[ix]*wavlen*1000-1.00)*(kxp[ix]*wavlen*1000-1.00)/2/9.82/9.82 + (kyp[iy]*wavlen*1000+2.09)*(kyp[iy]*wavlen*1000+2.09)/2/10.27/10.27));
-            if(( ix < 5 ) && ( iy < 5 )){
-              printf("kx: %g ky: %g scal: %g   ",kxp[ix],kyp[iy],scale_inco);
+            k2 = kxp2[ix] + kyp2[iy];
+            if( (k2 >= k2maxa) && (k2 <= k2maxb) ) {
+
+              /* Use newly calibrated 25.6mrad convergence angle, exp px size = 0.151mrad */
+
+              scale_inco = 1.062 * exp(-((kxp[ix]*wavlen*1000-0.911)*(kxp[ix]*wavlen*1000-0.911)/2/65.19/65.19 + (kyp[iy]*wavlen*1000+2.769)*(kyp[iy]*wavlen*1000+2.769)/2/70.54/70.54));
+              if(( ix < 5 ) && ( iy < 5 )){
+                printf("kx: %g ky: %g scal: %g\n",kxp[ix],kyp[iy],scale_inco);
+              }
+              prober[ip][ix][iy] *=  scale_inco;
+              probei[ip][ix][iy] *=  scale_inco;
+              sum0 += (double) (tr*tr + ti*ti);
+
             }
-            prober[ip][ix][iy] *= scale;
-            probei[ip][ix][iy] *= scale;
+            
+          }
+          scale = (float) (1.0/sqrt(sum0));
+
+/* Normalize whole probe to get sum=1 */
+
+        for( ix=0; ix<nxprobe; ix++)
+          for( iy=0; iy<nyprobe; iy++) {
+            if( (k2 >= k2maxa) && (k2 <= k2maxb) ) {
+
+              prober[ip][ix][iy] *=  scale;
+              probei[ip][ix][iy] *=  scale;
+            }
           }
 
     }  /* end for( ip...) */
 
+
+
     /* zero pacbed_signals */
     for(it=0; it<nThick; it++) {
       for(ix=0; ix<pacbed_nx; ix++) {
-	for(iy=0; iy<pacbed_ny; iy++) {
-	  pacbed_signals[ix][iy][it] = 0.0;
-	}
+	     for(iy=0; iy<pacbed_ny; iy++) {
+	       pacbed_signals[ix][iy][it] = 0.0;
+	      }
       }
     }
 
